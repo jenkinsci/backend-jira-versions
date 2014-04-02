@@ -7,6 +7,7 @@ import hudson.plugins.jira.soap.RemoteProject;
 import hudson.plugins.jira.soap.RemoteVersion;
 import hudson.util.VersionNumber;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -15,11 +16,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.rpc.ServiceException;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.jira.JIRA;
 import org.jvnet.hudson.update_center.DefaultMavenRepositoryBuilder;
 import org.jvnet.hudson.update_center.HudsonWar;
@@ -37,23 +40,10 @@ public class Main {
     @Option(name="-no-experimental",usage="Exclude alpha/beta releases")
     public boolean noExperimental;
     
-    @Option(name="-connectionCheckUrl",
-            usage="Specify an URL of the 'always up' server for performing connection check.")
-    public String connectionCheckUrl;
-    
     @Option(name="-jiraBaseUrl",
             usage="The base URL for the JIRA instance to add versions to")
     public String jiraBaseUrl;
 
-    @Option(name="-username",
-            usage="The username to login to JIRA")
-    public String jiraUsername;
-    
-    @Option(name="-password",
-            usage="The password to login to JIRA")
-    public String jiraPassword;
-    
-    
     public static void main( String[] args ) throws Exception {
         System.exit(new Main().run(args));        
     }
@@ -87,7 +77,15 @@ public class Main {
         addPluginVersions(jira, token, repo, allVersions);
     }
     
-    private String loginToJira(JiraSoapService jira) throws RemoteException {
+    private String loginToJira(JiraSoapService jira) throws RemoteException, IOException {
+        File f = new File(new File(System.getProperty("user.home")),".jenkins-ci.org");
+        String jiraUsername = "", jiraPassword = "";
+        if(f.isFile()) {            
+            Properties props = new Properties();
+            props.load(new FileInputStream(f));
+            jiraUsername = props.getProperty("userName");
+            jiraPassword = props.getProperty("password");
+        }
         return jira.login(jiraUsername, jiraPassword);
     }    
    
