@@ -44,6 +44,8 @@ public class Main {
             usage="The base URL for the JIRA instance to add versions to")
     public String jiraBaseUrl;
 
+    public String project = "VERTEST";
+
     public static void main( String[] args ) throws Exception {
         System.exit(new Main().run(args));        
     }
@@ -68,7 +70,7 @@ public class Main {
         String token = loginToJira(jira);
         
         List<String> allVersions = new ArrayList<String>();
-        RemoteVersion[] versions = jira.getVersions(token, "JENKINS");
+        RemoteVersion[] versions = jira.getVersions(token, project);
         for(RemoteVersion version : versions) {
             allVersions.add(version.getName());
         }
@@ -109,7 +111,7 @@ public class Main {
             boolean added = false;
             while (!added) {
                 try {
-                    jira.addVersion(token, "JENKINS", newCoreVersion);
+                    jira.addVersion(token, project, newCoreVersion);
                     added = true;
                 } catch (RemoteAuthenticationException e) {
                     token = loginToJira(jira);
@@ -151,7 +153,7 @@ public class Main {
                     boolean added = false;
                     while(!added) {
                         try {
-                            jira.addVersion(token, "JENKINS", newPluginVersion);
+                            jira.addVersion(token, project, newPluginVersion);
                             added = true;
                         } catch(RemoteAuthenticationException re) {
                             token = loginToJira(jira);
